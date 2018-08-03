@@ -1,57 +1,56 @@
 ﻿using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(Collider))]
 public class PlayerMovement : MonoBehaviour
 {
-    public float _speed = 10;
+    public float Speed = 10.0f;
+    public float Gravity = 10.0f;
+    public float MaxVelocityChange = 10.0f;
+    public bool CanJump = true;
+    public float JumpHeight = 2.0f;
+    public float LookSensitivity = 1;
 
-    public float _gravity = 9.8f;
-
-    public float _jumpVelocity = 250;
-
-    public float _lookSensitivity = 1;
-
-    public AnimationCurve _stopReaction;
-
-    private CharacterController _controller;
-
+    private Rigidbody _rigidbody;
     private Camera _camera;
+    private float _distToGround;
 
-    private float _verticalSpeed = 0;
-
-    // Use this for initialization
     void Start()
     {
-        _controller = transform.GetComponent<CharacterController>();
-        _camera = transform.GetComponent<Camera>();
-        //Cursor.lockState = CursorLockMode.Locked;
+        _camera = GetComponentInChildren<Camera>();
+        _rigidbody = GetComponent<Rigidbody>();
+        _rigidbody.freezeRotation = true;
+        _rigidbody.useGravity = true;
+        _distToGround = GetComponent<Collider>().bounds.extents.y;
     }
 
-    // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
-        // Calculate gravity
-        _verticalSpeed -= _gravity;
-        if (_controller.isGrounded)
+        if (IsGrounded())
         {
-            _verticalSpeed = 0;
-            if (Input.GetButton("Jump"))
+            // Calculate how fast we should be moving
+            Vector3 targetVelocity = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
+            targetVelocity = transform.TransformDirection(targetVelocity);
+            targetVelocity *= Speed;
+
+            // Apply a force that attempts to reach our target velocity
+            Vector3 velocity = _rigidbody.velocity;
+            Vector3 velocityChange = (targetVelocity - velocity);
+            velocityChange.x = Mathf.Clamp(velocityChange.x, -MaxVelocityChange, MaxVelocityChange);
+            velocityChange.z = Mathf.Clamp(velocityChange.z, -MaxVelocityChange, MaxVelocityChange);
+            velocityChange.y = 0;
+            _rigidbody.AddForce(velocityChange, ForceMode.VelocityChange);
+
+            // Jump
+            if (CanJump && Input.GetButton("Jump"))
             {
-                _verticalSpeed = _jumpVelocity;
+                _rigidbody.velocity = new Vector3(velocity.x, CalculateJumpVerticalSpeed(), velocity.z);
             }
         }
-        var gravityVector = new Vector3(0, _verticalSpeed, 0);
 
-        // Calculate movement
-        var forward = Input.GetAxis("Vertical");
-        var side = Input.GetAxis("Horizontal");
-        var movementDirection = new Vector3(side, 0, forward);
-        var movementVector = Quaternion.Euler(0, _camera.transform.rotation.eulerAngles.y, 0)
-                             * Vector3.ClampMagnitude(movementDirection, 1)
-                             * _speed;
-
-        // Move controller
-        _controller.Move((movementVector + gravityVector) * Time.deltaTime);
-
+        // We apply gravity manually for more tuning control
+        _rigidbody.AddForce(new Vector3(0, -Gravity * _rigidbody.mass, 0));
+        
         // Handle Cursor for testing.
         if (Input.GetButton("Cancel"))
         {
@@ -65,11 +64,28 @@ public class PlayerMovement : MonoBehaviour
         {
             return;
         }
+
         var xRot = Input.GetAxis("Mouse X");
         var yRot = Input.GetAxis("Mouse Y");
+        _rigidbody.transform.rotation = Quaternion.Euler(
+            new Vector3(0, xRot, 0)
+            * LookSensitivity
+            + _rigidbody.transform.rotation.eulerAngles);
         _camera.transform.rotation = Quaternion.Euler(
-            new Vector3(-yRot, xRot, 0)
-            * _lookSensitivity
+            new Vector3(-yRot, 0, 0)
+            * LookSensitivity
             + _camera.transform.rotation.eulerAngles);
+    }
+
+    private float CalculateJumpVerticalSpeed()
+    {
+        // From the jump height and gravity we deduce the upwards speed 
+        // for the character to reach at the apex.
+        return Mathf.Sqrt(2 * JumpHeight * Gravity);
+    }
+
+    private bool IsGrounded()
+    {
+        return Physics.Raycast(transform.position, -Vector3.up, _distToGround + 0.1f);
     }
 }
