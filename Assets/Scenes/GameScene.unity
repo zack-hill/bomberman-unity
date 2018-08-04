@@ -256,7 +256,7 @@ MonoBehaviour:
   Box: {fileID: 1070276302476432, guid: 4a4e623c23d4f3241a21b03cfac90746, type: 2}
   PermanentWall: {fileID: 1070276302476432, guid: cdbce63fead987f418d3713ccc42f153,
     type: 2}
-  PercentageChanceToSkipBox: 100
+  PercentageChanceToSkipBox: 10
 --- !u!4 &2034450226
 Transform:
   m_ObjectHideFlags: 0
