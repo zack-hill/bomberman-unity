@@ -8,11 +8,10 @@ public class Bomb : MonoBehaviour
     public GameObject Parent;
 
     private DateTime _startTime;
-    private Rigidbody _rigidbody;
+    private AudioSource _audioSource;
     private Collider _collider;
     private Collider _parentCollider;
-    private float _debugTime = 0;
-    private MeshRenderer _meshRenderer;
+
     private bool _isExploded;
 
 
@@ -20,8 +19,7 @@ public class Bomb : MonoBehaviour
     {
         _startTime = DateTime.Now;
 
-        _meshRenderer = GetComponent<MeshRenderer>();
-        _rigidbody = GetComponent<Rigidbody>();
+        _audioSource = GetComponent<AudioSource>();
         _collider = GetComponent<Collider>();
         _parentCollider = Parent.GetComponent<Collider>();
 
@@ -34,7 +32,8 @@ public class Bomb : MonoBehaviour
         {
             Explode();
         }
-        if (DateTime.Now > _startTime + TimeSpan.FromMilliseconds(FuseTime) + TimeSpan.FromMilliseconds(_debugTime))
+
+        if (_isExploded && !_audioSource.isPlaying)
         {
             Destroy(transform.gameObject);
         }
@@ -56,8 +55,17 @@ public class Bomb : MonoBehaviour
         }
         _isExploded = true;
 
-        _meshRenderer.enabled = false;
-        _rigidbody.constraints = RigidbodyConstraints.FreezeAll;
+        var meshRenderer = GetComponent<MeshRenderer>();
+        meshRenderer.enabled = false;
+
+        var sphereCollider = GetComponent<SphereCollider>();
+        sphereCollider.enabled = false;
+
+        var rigidbody = GetComponent<Rigidbody>();
+        rigidbody.constraints = RigidbodyConstraints.FreezeAll;
+
+        _audioSource.PlayOneShot(_audioSource.clip);
+
         ExplodeInDirection(new Vector3(1, 0, 0));
         ExplodeInDirection(new Vector3(-1, 0, 0));
         ExplodeInDirection(new Vector3(0, 0, 1));
@@ -76,6 +84,7 @@ public class Bomb : MonoBehaviour
             }
             if (hit.transform.tag == "Bomb")
             {
+                //todo: may want to explode all subsequent explosions after initial explosions to ensure that kills are reported correctly.
                 hit.transform.gameObject.GetComponent<Bomb>().Explode();
             }
 
