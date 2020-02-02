@@ -4,7 +4,7 @@ using UnityEngine;
 public class Bomb : MonoBehaviour
 {
     public float FuseTime = 1000;
-    public float ExplositionPower = 6;
+    public float ExplosionPower = 6;
     public GameObject Parent;
 
     private DateTime _startTime;
@@ -67,9 +67,8 @@ public class Bomb : MonoBehaviour
     private void ExplodeInDirection(Vector3 direction)
     {
         var radius = transform.localScale.x;
-        RaycastHit hit;
-        var distance = ExplositionPower;
-        if (Physics.SphereCast(new Ray(transform.position, direction), radius, out hit, ExplositionPower))
+        var distance = ExplosionPower;
+        if (Physics.SphereCast(new Ray(transform.position, direction), radius, out var hit, ExplosionPower))
         {
             if (hit.transform.tag == "Box")
             {
