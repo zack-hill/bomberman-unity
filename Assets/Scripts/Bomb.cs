@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using UnityEngine;
 
 public class Bomb : MonoBehaviour
@@ -75,28 +76,35 @@ public class Bomb : MonoBehaviour
     private void ExplodeInDirection(Vector3 direction)
     {
         var radius = transform.localScale.x;
-        var distance = ExplosionPower;
-        if (Physics.SphereCast(new Ray(transform.position, direction), radius, out var hit, ExplosionPower))
+
+        Debug.DrawLine(transform.position, transform.position + direction * ExplosionPower, Color.red, 10, false);
+
+        // Check all hits in ascending order of the distance from the bomb
+        foreach (var hit in Physics.SphereCastAll(transform.position, radius, direction, ExplosionPower).OrderBy(x => x.distance))
         {
+            // Ignore the exploding bomb and the floor
+            if (hit.transform == transform || hit.transform.name == "Floor")
+            {
+                continue;
+            }
+
             switch (hit.transform.tag)
             {
                 case "Box":
                     Destroy(hit.transform.gameObject);
-                    break;
+                    return;
                 case "Bomb":
-                    //todo: may want to explode all subsequent explosions after initial explosions to ensure that kills are reported correctly.
+                    //todo: we may want to explode all subsequent explosions after initial explosions to ensure that kills are reported correctly.
                     hit.transform.gameObject.GetComponent<Bomb>().Explode();
-                    break;
+                    return;
                 case "Player":
                     hit.transform.gameObject.GetComponent<Player>().Kill();
-                    break;
+                    return;
+                default:
+                    // An intersection has been found with some object that is not
+                    // destructible, but does block damage, likely a wall.
+                    return;
             }
-
-            distance = hit.distance;
         }
-
-        var start = transform.position;
-        var end = transform.position + direction * distance;
-        Debug.DrawLine(start, end, Color.red, 2, false);
     }
 }

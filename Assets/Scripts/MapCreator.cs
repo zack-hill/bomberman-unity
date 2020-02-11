@@ -135,6 +135,7 @@ public class MapCreator : MonoBehaviour
         var boxScale = MetersPerSquare * BoxScale;
         var position = new Vector3(worldPosition.x, boxScale / 2, worldPosition.y);
         var gameObject = Instantiate(Box, position, Quaternion.identity, parent.transform);
+        gameObject.name = $"Box ({x}, {z})";
         gameObject.transform.localScale = new Vector3(boxScale, boxScale, boxScale);
     }
 
