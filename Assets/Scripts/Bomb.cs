@@ -78,14 +78,18 @@ public class Bomb : MonoBehaviour
         var distance = ExplosionPower;
         if (Physics.SphereCast(new Ray(transform.position, direction), radius, out var hit, ExplosionPower))
         {
-            if (hit.transform.tag == "Box")
+            switch (hit.transform.tag)
             {
-                Destroy(hit.transform.gameObject);
-            }
-            if (hit.transform.tag == "Bomb")
-            {
-                //todo: may want to explode all subsequent explosions after initial explosions to ensure that kills are reported correctly.
-                hit.transform.gameObject.GetComponent<Bomb>().Explode();
+                case "Box":
+                    Destroy(hit.transform.gameObject);
+                    break;
+                case "Bomb":
+                    //todo: may want to explode all subsequent explosions after initial explosions to ensure that kills are reported correctly.
+                    hit.transform.gameObject.GetComponent<Bomb>().Explode();
+                    break;
+                case "Player":
+                    hit.transform.gameObject.GetComponent<Player>().Kill();
+                    break;
             }
 
             distance = hit.distance;

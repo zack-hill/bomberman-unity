@@ -16,4 +16,16 @@ public class Player : MonoBehaviour
             bomb.GetComponent<Bomb>().Parent = gameObject;
         }
     }
+
+    public void Kill()
+    {
+        GetComponent<MeshRenderer>().enabled = false;
+        GetComponent<CapsuleCollider>().enabled = false;
+        foreach (var meshRenderer in GetComponentsInChildren<MeshRenderer>())
+        {
+            meshRenderer.enabled = false;
+        }
+        Destroy(GetComponent<PlayerMovement>());
+        Destroy(GetComponent<Rigidbody>());
+    }
 }
