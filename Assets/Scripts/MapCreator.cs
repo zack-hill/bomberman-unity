@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using Random = UnityEngine.Random;
 
 public class MapCreator : MonoBehaviour
@@ -16,16 +17,45 @@ public class MapCreator : MonoBehaviour
 
     private int FullMapWidth => MapWidth + 2;
     private int FullMapHeight => MapHeight + 2;
+    private Transform _mapRoot;
 
     public void Start()
     {
+        CreateMap();
+    }
+
+    public void Update()
+    {
+    }
+
+    public void CreateMap()
+    {
+        if (_mapRoot != null)
+        {
+            Destroy(_mapRoot);
+        }
+
+        _mapRoot = new GameObject("Map").transform;
         CreateFloor();
         CreatePermanentWalls();
         CreateBoxes();
     }
 
-    public void Update()
+    public List<Vector3> GetSpawnPoints()
     {
+        return new List<Vector3>
+        {
+            GetSpawnPoint(1, 1),
+            GetSpawnPoint(1, MapHeight),
+            GetSpawnPoint(MapWidth, 1),
+            GetSpawnPoint(MapWidth, MapHeight),
+        };
+    }
+
+    private Vector3 GetSpawnPoint(int x, int z)
+    {
+        var worldPosition = GetPositionInGrid(x, z);
+        return new Vector3(worldPosition.x, MetersPerSquare / 2, worldPosition.y);
     }
 
     private void CreateFloor()
@@ -55,6 +85,7 @@ public class MapCreator : MonoBehaviour
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
         var gameObject = new GameObject("Floor");
+        gameObject.transform.parent = _mapRoot;
         var collider = gameObject.AddComponent<MeshCollider>();
         collider.sharedMesh = mesh;
         var renderer = gameObject.AddComponent<MeshRenderer>();
@@ -67,23 +98,18 @@ public class MapCreator : MonoBehaviour
     private void CreatePermanentWalls()
     {
         var permanentWalls = new GameObject("Permanent Walls");
+        permanentWalls.transform.parent = _mapRoot;
+
         for (var x = 0; x < FullMapWidth; x++)
         {
-            CreatePermanentWall(x, 0, permanentWalls);
-            CreatePermanentWall(x, FullMapHeight - 1, permanentWalls);
-        }
-
-        for (var z = 1; z < FullMapHeight - 1; z++)
-        {
-            CreatePermanentWall(0, z, permanentWalls);
-            CreatePermanentWall(FullMapWidth - 1, z, permanentWalls);
-        }
-
-        for (var x = 1; x < FullMapWidth - 1; x++)
-        {
-            for (var z = 1; z < FullMapHeight - 1; z++)
+            for (var z = 0; z < FullMapHeight; z++)
             {
-                if (x % 2 == 0 && z % 2 == 0)
+                if (x == 0 || 
+                    x == FullMapWidth - 1 ||
+                    z == 0 ||
+                    z == FullMapHeight - 1 ||
+                    x % 2 == 0 && 
+                    z % 2 == 0)
                 {
                     CreatePermanentWall(x, z, permanentWalls);
                 }
@@ -96,12 +122,14 @@ public class MapCreator : MonoBehaviour
         var worldPosition = GetPositionInGrid(x, z);
         var position = new Vector3(worldPosition.x, MetersPerSquare / 2, worldPosition.y);
         var gameObject = Instantiate(PermanentWall, position, Quaternion.identity, parent.transform);
+        gameObject.name = $"Wall ({x}, {z})";
         gameObject.transform.localScale = new Vector3(MetersPerSquare, MetersPerSquare, MetersPerSquare);
     }
 
     private void CreateBoxes()
     {
         var boxes = new GameObject("Boxes");
+        boxes.transform.parent = _mapRoot;
         for (var x = 1; x < FullMapWidth - 1; x++)
         {
             for (var z = 3; z < FullMapHeight - 3; z++)
