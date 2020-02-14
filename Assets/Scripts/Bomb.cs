@@ -5,8 +5,9 @@ using UnityEngine;
 public class Bomb : MonoBehaviour
 {
     public float FuseTime = 1000;
-    public float ExplosionPower = 6;
+    public float ExplosionPower = 3;
     public GameObject OwningPlayer;
+    public ParticleSystem FireParticles;
 
     private DateTime _startTime;
     private AudioSource _audioSource;
@@ -68,17 +69,29 @@ public class Bomb : MonoBehaviour
 
         _audioSource.PlayOneShot(_audioSource.clip);
 
-        ExplodeInDirection(new Vector3(1, 0, 0));
-        ExplodeInDirection(new Vector3(-1, 0, 0));
-        ExplodeInDirection(new Vector3(0, 0, 1));
-        ExplodeInDirection(new Vector3(0, 0, -1));
+        var xPosDist = ExplodeInDirection(new Vector3(1, 0, 0));
+        var xNegDist = ExplodeInDirection(new Vector3(-1, 0, 0));
+        var zPosDist = ExplodeInDirection(new Vector3(0, 0, 1));
+        var zNegDist = ExplodeInDirection(new Vector3(0, 0, -1));
+
+        var xTotal = xPosDist + xNegDist;
+        var zTotal = zPosDist + zNegDist;
+
+        var xCenter = transform.position.x - xNegDist + xTotal / 2;
+        var zCenter = transform.position.z - zNegDist + zTotal / 2;
+
+        var xParticles = Instantiate(FireParticles, new Vector3(xCenter, transform.position.y, transform.position.z), Quaternion.identity);
+        var zParticles = Instantiate(FireParticles, new Vector3(transform.position.x, transform.position.y, zCenter), Quaternion.identity);
+
+        xParticles.transform.localScale = new Vector3(xTotal, transform.localScale.y, transform.localScale.z);
+        zParticles.transform.localScale = new Vector3(transform.localScale.z, transform.localScale.y, zTotal);
 
         Exploded?.Invoke(this, EventArgs.Empty);
     }
 
-    private void ExplodeInDirection(Vector3 direction)
+    private float ExplodeInDirection(Vector3 direction)
     {
-        var radius = transform.localScale.x;
+        var radius = transform.localScale.x / 2;
 
         Debug.DrawLine(transform.position, transform.position + direction * ExplosionPower, Color.red, 10, false);
 
@@ -95,19 +108,20 @@ public class Bomb : MonoBehaviour
             {
                 case "Box":
                     Destroy(hit.transform.gameObject);
-                    return;
+                    break;
                 case "Bomb":
                     //todo: we may want to explode all subsequent explosions after initial explosions to ensure that kills are reported correctly.
                     hit.transform.gameObject.GetComponent<Bomb>().Explode();
-                    return;
+                    break;
                 case "Player":
                     hit.transform.gameObject.GetComponent<Player>().Kill();
-                    return;
-                default:
-                    // An intersection has been found with some object that is not
-                    // destructible, but does block damage, likely a wall.
-                    return;
+                    break;
             }
+
+            //Debug.Log($"Hit {hit.transform.name} at {hit.distance}m in direction {direction}");
+            return hit.distance;
         }
+
+        return ExplosionPower;
     }
 }

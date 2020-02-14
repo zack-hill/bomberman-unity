@@ -59,6 +59,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
@@ -122,8 +123,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   FuseTime: 5000
-  ExplosionPower: 6
-  Parent: {fileID: 0}
+  ExplosionPower: 3
+  OwningPlayer: {fileID: 0}
+  FireParticles: {fileID: 1734312396100896887, guid: ebca2ed7b48a4914ab71a19d0b14df27,
+    type: 3}
 --- !u!54 &54536559501674338
 Rigidbody:
   m_ObjectHideFlags: 0
