@@ -1,8 +1,12 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class Player : MonoBehaviour
 {
     public GameObject Bomb;
+
+    private int _maxBombCount = 1;
+    private int _activeBombCount;
     
     public void Start()
     {
@@ -12,8 +16,17 @@ public class Player : MonoBehaviour
     {
         if (Input.GetButtonDown("Fire1"))
         {
-            var bomb = Instantiate(Bomb, transform.position, Quaternion.identity);
-            bomb.GetComponent<Bomb>().Parent = gameObject;
+            if (_activeBombCount == _maxBombCount)
+            {
+                return;
+            }
+
+            var bombGameObject = Instantiate(Bomb, transform.position, Quaternion.identity);
+            var bomb = bombGameObject.GetComponent<Bomb>();
+            bomb.OwningPlayer = gameObject;
+            bomb.Exploded += BombOnExploded;
+
+            _activeBombCount += 1;
         }
     }
 
@@ -27,5 +40,10 @@ public class Player : MonoBehaviour
         }
         Destroy(GetComponent<PlayerMovement>());
         Destroy(GetComponent<Rigidbody>());
+    }
+
+    private void BombOnExploded(object sender, EventArgs e)
+    {
+        _activeBombCount -= 1;
     }
 }

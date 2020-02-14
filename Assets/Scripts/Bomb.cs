@@ -6,7 +6,7 @@ public class Bomb : MonoBehaviour
 {
     public float FuseTime = 1000;
     public float ExplosionPower = 6;
-    public GameObject Parent;
+    public GameObject OwningPlayer;
 
     private DateTime _startTime;
     private AudioSource _audioSource;
@@ -15,14 +15,15 @@ public class Bomb : MonoBehaviour
 
     private bool _isExploded;
 
-
+    public event EventHandler Exploded;
+    
     public void Start()
     {
         _startTime = DateTime.Now;
 
         _audioSource = GetComponent<AudioSource>();
         _collider = GetComponent<Collider>();
-        _parentCollider = Parent.GetComponent<Collider>();
+        _parentCollider = OwningPlayer.GetComponent<Collider>();
 
         Physics.IgnoreCollision(_collider, _parentCollider, true);
     }
@@ -71,6 +72,8 @@ public class Bomb : MonoBehaviour
         ExplodeInDirection(new Vector3(-1, 0, 0));
         ExplodeInDirection(new Vector3(0, 0, 1));
         ExplodeInDirection(new Vector3(0, 0, -1));
+
+        Exploded?.Invoke(this, EventArgs.Empty);
     }
 
     private void ExplodeInDirection(Vector3 direction)
