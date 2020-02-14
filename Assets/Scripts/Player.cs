@@ -7,6 +7,7 @@ public class Player : MonoBehaviour
 
     private int _maxBombCount = 1;
     private int _activeBombCount;
+    private bool _isAlive = true;
     
     public void Start()
     {
@@ -14,7 +15,7 @@ public class Player : MonoBehaviour
 
     public void Update()
     {
-        if (Input.GetButtonDown("Fire1"))
+        if (_isAlive && Input.GetButtonDown("Fire1"))
         {
             if (_activeBombCount == _maxBombCount)
             {
@@ -32,6 +33,7 @@ public class Player : MonoBehaviour
 
     public void Kill()
     {
+        _isAlive = false;
         GetComponent<MeshRenderer>().enabled = false;
         GetComponent<CapsuleCollider>().enabled = false;
         foreach (var meshRenderer in GetComponentsInChildren<MeshRenderer>())
