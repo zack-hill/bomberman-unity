@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -9,7 +9,7 @@ public class MapCreator : MonoBehaviour
     [Range(5, 25)] 
     public int MapHeight = 13;
     public float MetersPerSquare = 3;
-    public float BoxScale = 0.75f;
+    public Vector3 BoxScale = new Vector3(1, 1, 1);
     public Material FloorMaterial;
     public GameObject Box;
     public GameObject PermanentWall;
@@ -104,11 +104,11 @@ public class MapCreator : MonoBehaviour
         {
             for (var z = 0; z < FullMapHeight; z++)
             {
-                if (x == 0 || 
+                if (x == 0 ||
                     x == FullMapWidth - 1 ||
                     z == 0 ||
                     z == FullMapHeight - 1 ||
-                    x % 2 == 0 && 
+                    x % 2 == 0 &&
                     z % 2 == 0)
                 {
                     CreatePermanentWall(x, z, permanentWalls);
@@ -161,10 +161,10 @@ public class MapCreator : MonoBehaviour
 
         var worldPosition = GetPositionInGrid(x, z);
         var boxScale = MetersPerSquare * BoxScale;
-        var position = new Vector3(worldPosition.x, boxScale / 2, worldPosition.y);
+        var position = new Vector3(worldPosition.x, boxScale.y / 2, worldPosition.y);
         var gameObject = Instantiate(Box, position, Quaternion.identity, parent.transform);
         gameObject.name = $"Box ({x}, {z})";
-        gameObject.transform.localScale = new Vector3(boxScale, boxScale, boxScale);
+        gameObject.transform.localScale = boxScale;
     }
 
     private Vector2 GetPositionInGrid(int x, int z)

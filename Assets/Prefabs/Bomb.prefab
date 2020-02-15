@@ -122,7 +122,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72ee92ec242c49548ba8bfaef8c98221, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  FuseTime: 5000
+  FuseTime: 2500
   ExplosionPower: 3
   OwningPlayer: {fileID: 0}
   FireParticles: {fileID: 1734312396100896887, guid: ebca2ed7b48a4914ab71a19d0b14df27,
