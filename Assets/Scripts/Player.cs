@@ -5,35 +5,25 @@ public class Player : MonoBehaviour
 {
     public GameObject Bomb;
 
-    private int _maxBombCount = 1;
-    private int _activeBombCount;
-    private bool _isAlive = true;
+    protected int MaxBombCount = 2;
+    protected int ActiveBombCount;
+    protected bool IsAlive = true;
     
-    public void Start()
+    public virtual void Start()
     {
     }
 
-    public void Update()
+    public virtual void Update()
     {
-        if (_isAlive && Input.GetButtonDown("Fire1"))
-        {
-            if (_activeBombCount == _maxBombCount)
-            {
-                return;
-            }
-
-            var bombGameObject = Instantiate(Bomb, transform.position, Quaternion.identity);
-            var bomb = bombGameObject.GetComponent<Bomb>();
-            bomb.OwningPlayer = gameObject;
-            bomb.Exploded += BombOnExploded;
-
-            _activeBombCount += 1;
-        }
     }
 
     public void Kill()
     {
-        _isAlive = false;
+        if (!IsAlive)
+        {
+            return;
+        }
+        IsAlive = false;
         GetComponent<MeshRenderer>().enabled = false;
         GetComponent<CapsuleCollider>().enabled = false;
         foreach (var meshRenderer in GetComponentsInChildren<MeshRenderer>())
@@ -44,8 +34,24 @@ public class Player : MonoBehaviour
         Destroy(GetComponent<Rigidbody>());
     }
 
+
+    protected void PlaceBomb()
+    {
+        if (ActiveBombCount == MaxBombCount)
+        {
+            return;
+        }
+
+        var bombGameObject = Instantiate(Bomb, transform.position, Quaternion.identity);
+        var bomb = bombGameObject.GetComponent<Bomb>();
+        bomb.OwningPlayer = gameObject;
+        bomb.Exploded += BombOnExploded;
+
+        ActiveBombCount += 1;
+    }
+
     private void BombOnExploded(object sender, EventArgs e)
     {
-        _activeBombCount -= 1;
+        ActiveBombCount -= 1;
     }
 }

@@ -2,7 +2,8 @@
 
 public class GameManager : MonoBehaviour
 {
-    public GameObject Player;
+    public GameObject HumanPlayer;
+    public GameObject BotPlayer;
 
     private MapCreator _mapCreator;
 
@@ -11,11 +12,19 @@ public class GameManager : MonoBehaviour
     {
         _mapCreator = GetComponent<MapCreator>();
 
-        foreach (var spawnPoint in _mapCreator.GetSpawnPoints())
+        var spawnPoints = _mapCreator.GetSpawnPoints();
+
+        for (var i = 0; i < spawnPoints.Count; i++)
         {
-            var player = Instantiate(Player);
+            var spawnPoint = spawnPoints[i];
+            var player = i == 0 ? Instantiate(HumanPlayer) : Instantiate(BotPlayer);
             player.transform.position = spawnPoint;
-            player.transform.LookAt(new Vector3(0, spawnPoint.y, 0)); 
+            player.transform.LookAt(new Vector3(0, spawnPoint.y, 0));
+            player.transform.name = $"Player {i + 1}";
+            if (i > 0)
+            {
+                player.transform.name += " (Bot)";
+            }
         }
     }
 
