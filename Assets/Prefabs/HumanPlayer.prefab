@@ -16,8 +16,9 @@ GameObject:
   - component: {fileID: 54762596005708310}
   - component: {fileID: 6531675729464242079}
   - component: {fileID: 114328436463882826}
+  - component: {fileID: -7179385473378909674}
   m_Layer: 0
-  m_Name: Player
+  m_Name: HumanPlayer
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -155,6 +156,22 @@ MonoBehaviour:
   CanJump: 1
   JumpHeight: 2
   LookSensitivity: 4
+--- !u!114 &-7179385473378909674
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1248688944475830}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e3fdca004f2d45fe8abbed571a8abd5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_OverrideArea: 0
+  m_Area: 0
+  m_IgnoreFromBuild: 1
+  m_AffectedAgents: ffffffff
 --- !u!1 &1467513497415626
 GameObject:
   m_ObjectHideFlags: 0

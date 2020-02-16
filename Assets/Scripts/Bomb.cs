@@ -104,24 +104,35 @@ public class Bomb : MonoBehaviour
                 continue;
             }
 
-            switch (hit.transform.tag)
-            {
-                case "Box":
-                    Destroy(hit.transform.gameObject);
-                    break;
-                case "Bomb":
-                    //todo: we may want to explode all subsequent explosions after initial explosions to ensure that kills are reported correctly.
-                    hit.transform.gameObject.GetComponent<Bomb>().Explode();
-                    break;
-                case "Player":
-                    hit.transform.gameObject.GetComponent<Player>().Kill();
-                    break;
-            }
+            Hit(hit.transform.gameObject);
 
-            //Debug.Log($"Hit {hit.transform.name} at {hit.distance}m in direction {direction}");
             return hit.distance;
         }
 
         return ExplosionPower;
+    }
+
+    private static void Hit(GameObject obj)
+    {
+        var player = obj.GetComponent<Player>();
+        if (player != null)
+        {
+            player.Kill();
+            return;
+        }
+
+        var destructibleWall = obj.GetComponent<DestructibleWall>();
+        if (destructibleWall != null)
+        {
+            destructibleWall.Destroy();
+            return;
+        }
+
+        //todo: we may want to explode all subsequent explosions after initial explosions to ensure that kills are reported correctly.
+        var bomb = obj.GetComponent<Bomb>();
+        if (bomb != null)
+        {
+            bomb.Explode();
+        }
     }
 }

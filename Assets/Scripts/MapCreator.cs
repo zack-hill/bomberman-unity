@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
 using Random = UnityEngine.Random;
 
 public class MapCreator : MonoBehaviour
@@ -9,15 +11,18 @@ public class MapCreator : MonoBehaviour
     [Range(5, 25)] 
     public int MapHeight = 13;
     public float MetersPerSquare = 3;
-    public Vector3 BoxScale = new Vector3(1, 1, 1);
     public Material FloorMaterial;
-    public GameObject Box;
     public GameObject PermanentWall;
-    public float PercentageChanceToSkipBox = 10;
+    public GameObject DestructibleWall;
+    public Vector3 DestructibleWallScale = new Vector3(1, 1, 1);
+
+    [Tooltip("The percentage chance to not spawn a destructible wall at a given cell.")]
+    public float GapChance = 10;
 
     private int FullMapWidth => MapWidth + 2;
     private int FullMapHeight => MapHeight + 2;
     private Transform _mapRoot;
+    private NavMeshSurface _navMeshSurface;
 
     public void Start()
     {
@@ -38,7 +43,8 @@ public class MapCreator : MonoBehaviour
         _mapRoot = new GameObject("Map").transform;
         CreateFloor();
         CreatePermanentWalls();
-        CreateBoxes();
+        CreateDestructibleWalls();
+        _navMeshSurface.BuildNavMesh();
     }
 
     public List<Vector3> GetSpawnPoints()
@@ -84,15 +90,16 @@ public class MapCreator : MonoBehaviour
         };
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
-        var gameObject = new GameObject("Floor");
-        gameObject.transform.parent = _mapRoot;
-        var collider = gameObject.AddComponent<MeshCollider>();
+        var floor = new GameObject("Floor");
+        floor.transform.parent = _mapRoot;
+        var collider = floor.AddComponent<MeshCollider>();
         collider.sharedMesh = mesh;
-        var renderer = gameObject.AddComponent<MeshRenderer>();
+        var renderer = floor.AddComponent<MeshRenderer>();
         renderer.material = FloorMaterial;
         renderer.material.mainTextureScale = new Vector2(FullMapWidth, FullMapHeight);
-        var filter = gameObject.AddComponent<MeshFilter>();
+        var filter = floor.AddComponent<MeshFilter>();
         filter.mesh = mesh;
+        _navMeshSurface = floor.AddComponent<NavMeshSurface>();
     }
 
     private void CreatePermanentWalls()
@@ -126,7 +133,7 @@ public class MapCreator : MonoBehaviour
         gameObject.transform.localScale = new Vector3(MetersPerSquare, MetersPerSquare, MetersPerSquare);
     }
 
-    private void CreateBoxes()
+    private void CreateDestructibleWalls()
     {
         var boxes = new GameObject("Boxes");
         boxes.transform.parent = _mapRoot;
@@ -134,37 +141,39 @@ public class MapCreator : MonoBehaviour
         {
             for (var z = 3; z < FullMapHeight - 3; z++)
             {
-                CreateBox(x, z, boxes);
+                CreateDestructibleWall(x, z, boxes);
             }
         }
 
         for (var x = 3; x < FullMapWidth - 3; x++)
         {
-            CreateBox(x, 1, boxes);
-            CreateBox(x, 2, boxes);
-            CreateBox(x, FullMapHeight - 2, boxes);
-            CreateBox(x, FullMapHeight - 3, boxes);
+            CreateDestructibleWall(x, 1, boxes);
+            CreateDestructibleWall(x, 2, boxes);
+            CreateDestructibleWall(x, FullMapHeight - 2, boxes);
+            CreateDestructibleWall(x, FullMapHeight - 3, boxes);
         }
     }
 
-    private void CreateBox(int x, int z, GameObject parent)
+    private void CreateDestructibleWall(int x, int z, GameObject parent)
     {
         if (x % 2 == 0 && z % 2 == 0)
         {
             return;
         }
 
-        if (Random.Range(0, 100) < PercentageChanceToSkipBox)
+        if (Random.Range(0, 100) < GapChance)
         {
             return;
         }
 
         var worldPosition = GetPositionInGrid(x, z);
-        var boxScale = MetersPerSquare * BoxScale;
+        var boxScale = MetersPerSquare * DestructibleWallScale;
         var position = new Vector3(worldPosition.x, boxScale.y / 2, worldPosition.y);
-        var gameObject = Instantiate(Box, position, Quaternion.identity, parent.transform);
-        gameObject.name = $"Box ({x}, {z})";
+        var gameObject = Instantiate(DestructibleWall, position, Quaternion.identity, parent.transform);
+        gameObject.name = $"DestructibleWall ({x}, {z})";
         gameObject.transform.localScale = boxScale;
+        var destructibleWall = gameObject.GetComponent<DestructibleWall>();
+        destructibleWall.Destroyed += DestructibleWallOnDestroyed;
     }
 
     private Vector2 GetPositionInGrid(int x, int z)
@@ -174,6 +183,13 @@ public class MapCreator : MonoBehaviour
         return new Vector3(
             -halfWidth + x * MetersPerSquare + MetersPerSquare / 2,
             -halfHeight + z * MetersPerSquare + MetersPerSquare / 2);
+    }
+
+    private void DestructibleWallOnDestroyed(object sender, EventArgs e)
+    {
+        var destructibleWall = (DestructibleWall) sender;
+        destructibleWall.Destroyed -= DestructibleWallOnDestroyed;
+        _navMeshSurface.BuildNavMesh();
     }
 }
 

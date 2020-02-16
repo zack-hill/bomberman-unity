@@ -246,12 +246,13 @@ MonoBehaviour:
   MapWidth: 11
   MapHeight: 11
   MetersPerSquare: 3
-  BoxScale: {x: 0.95, y: 0.95, z: 0.95}
   FloorMaterial: {fileID: 2100000, guid: b5ab461b50667aa49a04482135095614, type: 2}
-  Box: {fileID: 1070276302476432, guid: 4a4e623c23d4f3241a21b03cfac90746, type: 3}
   PermanentWall: {fileID: 1070276302476432, guid: cdbce63fead987f418d3713ccc42f153,
     type: 3}
-  PercentageChanceToSkipBox: 10
+  DestructibleWall: {fileID: 1070276302476432, guid: 4a4e623c23d4f3241a21b03cfac90746,
+    type: 3}
+  DestructibleWallScale: {x: 1, y: 1, z: 1}
+  GapChance: 10
 --- !u!4 &2034450226
 Transform:
   m_ObjectHideFlags: 0
