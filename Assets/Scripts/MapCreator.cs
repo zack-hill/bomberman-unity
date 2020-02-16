@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -44,7 +44,7 @@ public class MapCreator : MonoBehaviour
         CreateFloor();
         CreatePermanentWalls();
         CreateDestructibleWalls();
-        _navMeshSurface.BuildNavMesh();
+        RebuildNavMesh();
     }
 
     public List<Vector3> GetSpawnPoints()
@@ -56,6 +56,11 @@ public class MapCreator : MonoBehaviour
             GetSpawnPoint(MapWidth, 1),
             GetSpawnPoint(MapWidth, MapHeight),
         };
+    }
+
+    public void RebuildNavMesh()
+    {
+        _navMeshSurface.BuildNavMesh();
     }
 
     private Vector3 GetSpawnPoint(int x, int z)
@@ -189,7 +194,7 @@ public class MapCreator : MonoBehaviour
     {
         var destructibleWall = (DestructibleWall) sender;
         destructibleWall.Destroyed -= DestructibleWallOnDestroyed;
-        _navMeshSurface.BuildNavMesh();
+        RebuildNavMesh();
     }
 }
 

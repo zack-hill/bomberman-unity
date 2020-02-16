@@ -8,6 +8,8 @@ public class Player : MonoBehaviour
     protected int MaxBombCount = 2;
     protected int ActiveBombCount;
     protected bool IsAlive = true;
+
+    public event EventHandler<GameObject> BombPlaced;
     
     public virtual void Start()
     {
@@ -47,11 +49,16 @@ public class Player : MonoBehaviour
         bomb.OwningPlayer = gameObject;
         bomb.Exploded += BombOnExploded;
 
+        BombPlaced?.Invoke(this, bombGameObject);
+
         ActiveBombCount += 1;
     }
 
     private void BombOnExploded(object sender, EventArgs e)
     {
+        var bomb = (Bomb) sender;
+        bomb.Exploded -= BombOnExploded;
+
         ActiveBombCount -= 1;
     }
 }

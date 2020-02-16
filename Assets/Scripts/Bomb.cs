@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class Bomb : MonoBehaviour
 {
@@ -66,6 +67,9 @@ public class Bomb : MonoBehaviour
 
         var rigidbody = GetComponent<Rigidbody>();
         rigidbody.constraints = RigidbodyConstraints.FreezeAll;
+
+        var navMeshObstacle = GetComponent<NavMeshModifierVolume>();
+        navMeshObstacle.enabled = false;
 
         _audioSource.PlayOneShot(_audioSource.clip);
 
