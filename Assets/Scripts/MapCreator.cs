@@ -53,14 +53,15 @@ public class MapCreator : MonoBehaviour
         {
             GetSpawnPoint(1, 1),
             GetSpawnPoint(1, MapHeight),
-            GetSpawnPoint(MapWidth, 1),
-            GetSpawnPoint(MapWidth, MapHeight),
+            //GetSpawnPoint(MapWidth, 1),
+            //GetSpawnPoint(MapWidth, MapHeight),
         };
     }
 
     public void RebuildNavMesh()
     {
         _navMeshSurface.BuildNavMesh();
+        Debug.Log("NavMesh Rebuilt!");
     }
 
     private Vector3 GetSpawnPoint(int x, int z)

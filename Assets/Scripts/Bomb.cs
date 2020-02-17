@@ -25,8 +25,8 @@ public class Bomb : MonoBehaviour
 
         _audioSource = GetComponent<AudioSource>();
         _collider = GetComponent<Collider>();
-        _parentCollider = OwningPlayer.GetComponent<Collider>();
 
+        _parentCollider = OwningPlayer?.GetComponent<Collider>();
         Physics.IgnoreCollision(_collider, _parentCollider, true);
     }
 
@@ -121,7 +121,8 @@ public class Bomb : MonoBehaviour
         var player = obj.GetComponent<Player>();
         if (player != null)
         {
-            player.Kill();
+            //player.Kill();
+            Debug.Log($"Killed {obj.transform.name}");
             return;
         }
 

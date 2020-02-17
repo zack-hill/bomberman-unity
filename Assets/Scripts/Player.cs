@@ -5,7 +5,7 @@ public class Player : MonoBehaviour
 {
     public GameObject Bomb;
 
-    protected int MaxBombCount = 2;
+    protected int MaxBombCount = 1;
     protected int ActiveBombCount;
     protected bool IsAlive = true;
 
@@ -19,7 +19,7 @@ public class Player : MonoBehaviour
     {
     }
 
-    public void Kill()
+    public virtual void Kill()
     {
         if (!IsAlive)
         {
@@ -32,7 +32,6 @@ public class Player : MonoBehaviour
         {
             meshRenderer.enabled = false;
         }
-        Destroy(GetComponent<PlayerMovement>());
         Destroy(GetComponent<Rigidbody>());
     }
 
